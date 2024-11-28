@@ -110,4 +110,7 @@ dependencies {
     // Firebase
     implementation "com.firebaseui:firebase-ui-auth:$firebaseUiAuthVersion"
     implementation "com.google.firebase:firebase-auth-ktx:$firebaseAuthKtxVersion"
+
+    // Timber
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 }

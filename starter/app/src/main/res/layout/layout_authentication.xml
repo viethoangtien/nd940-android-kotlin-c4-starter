@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/margin_normal"
+            android:scaleType="centerCrop"
+            app:layout_constraintDimensionRatio="16:9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/map" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/button_sign_in_email"
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/_16dp"
+            android:background="@drawable/bg_sign_in_email"
+            android:drawableStart="@drawable/ic_email"
+            android:drawablePadding="@dimen/_16dp"
+            android:gravity="center"
+            android:paddingVertical="@dimen/_12dp"
+            android:paddingStart="@dimen/_8dp"
+            android:paddingEnd="@dimen/_32dp"
+            android:text="@string/sign_in_with_email"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/button_sign_in_google"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/button_sign_in_google"
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/_32dp"
+            android:background="@drawable/bg_sign_in_google"
+            android:drawableStart="@drawable/ic_google"
+            android:drawablePadding="@dimen/_16dp"
+            android:gravity="center"
+            android:paddingVertical="@dimen/_12dp"
+            android:paddingStart="@dimen/_8dp"
+            android:paddingEnd="@dimen/_32dp"
+            android:text="@string/sign_in_with_google"
+            android:textColor="@color/gray"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
