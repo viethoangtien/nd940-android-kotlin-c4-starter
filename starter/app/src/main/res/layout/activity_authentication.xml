@@ -24,20 +24,12 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:clickable="true"
             android:id="@+id/text_login"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@color/colorAccent"
-            android:focusable="true"
-            android:paddingTop="@dimen/padding_large"
-            android:paddingBottom="@dimen/padding_large"
+            style="@style/Button"
             android:text="@string/login"
-            android:textAlignment="center"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

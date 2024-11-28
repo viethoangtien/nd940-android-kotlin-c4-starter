@@ -1,0 +1,110 @@
+[
+    {
+        "featureType": "water",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#aeeeee"  // Light blue for water
+            },
+            {
+                "lightness": 30
+            }
+        ]
+    },
+    {
+        "featureType": "landscape",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#f8f9fb"  // Light green for landscape
+            },
+            {
+                "lightness": 20
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#ffffff"  // White for roads
+            },
+            {
+                "lightness": 10
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#f0f0f0"  // Light gray for points of interest
+            },
+            {
+                "lightness": 20
+            }
+        ]
+    },
+    {
+        "featureType": "administrative",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#000000"  // Black for administrative boundaries
+            },
+            {
+                "lightness": 25
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry.fill",
+        "stylers": [
+            {
+                "color": "#f3f3f3"  // Light gray for highways
+            },
+            {
+                "lightness": 40
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#ffffff"  // White for highway borders
+            },
+            {
+                "lightness": 20
+            }
+        ]
+    },
+    {
+        "featureType": "transit",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#ffffff"  // White for transit areas
+            },
+            {
+                "lightness": 20
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#c0ecad"  // Light green for parks
+            },
+            {
+                "lightness": 20
+            }
+        ]
+    }
+]
