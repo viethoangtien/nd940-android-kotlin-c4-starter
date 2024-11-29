@@ -2,14 +2,22 @@ package com.udacity.project4
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.dto.toReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.util.DataBindingIdlingResource
+import com.udacity.project4.util.monitorActivity
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -18,15 +26,26 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
+import kotlin.test.Test
+import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 //END TO END test to black box test the app
 class RemindersActivityTest :
     KoinTest {// Extended Koin Test - embed autoclose @after method to close Koin after every test
-
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
+    private val dataBindingIdlingResource = DataBindingIdlingResource()
+    private val countingIdlingResource = CountingIdlingResource("GLOBAL")
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
@@ -49,7 +68,7 @@ class RemindersActivityTest :
                     get() as ReminderDataSource
                 )
             }
-            single { RemindersLocalRepository(get()) }
+            single <ReminderDataSource>{ RemindersLocalRepository(get()) }
             single { LocalDB.createRemindersDao(appContext) }
         }
         //declare a new koin module
@@ -63,9 +82,49 @@ class RemindersActivityTest :
         runBlocking {
             repository.deleteAllReminders()
         }
+        IdlingRegistry.getInstance().register(countingIdlingResource)
+        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
+
     }
 
+    @After
+    fun tearDown() {
+        IdlingRegistry.getInstance().unregister(countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
+    }
 
-//    TODO: add End to End testing to the app
+    @Test
+    fun saveReminder() = runBlocking {
+        val reminder = ReminderDataItem(
+            title = "TITLE",
+            description = "DESCRIPTION",
+            location = "Pham Van Bach",
+            latitude = 21.026988562137088,
+            longitude = 105.78886761961745
+        )
+        repository.saveReminder(reminder.toReminderDTO())
+
+        // Start up Tasks screen.
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        // Interact with the activity
+        activityScenario.onActivity { activity ->
+            // Perform actions on the activity
+            dataBindingIdlingResource.monitorActivity(activityScenario)
+
+            onView(withId(R.id.reminderssRecyclerView)).check(matches(isDisplayed()))
+            onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(1)))
+
+            onView(withId(R.id.addReminderFAB)).perform(click())
+            onView(withId(R.id.reminderTitle)).perform(replaceText("NEW TITLE"))
+            onView(withId(R.id.reminderDescription)).perform(replaceText("NEW DESCRIPTION"))
+            onView(withId(R.id.saveReminder)).perform(click())
+
+            onView(withText("NEW TITLE")).check(matches(isDisplayed()))
+            onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(2)))
+
+        }
+        activityScenario.close()
+    }
+
 
 }
