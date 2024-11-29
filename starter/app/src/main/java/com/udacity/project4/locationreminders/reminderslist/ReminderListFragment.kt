@@ -8,6 +8,7 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
+import com.udacity.project4.locationreminders.ReminderDescriptionActivity
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
@@ -24,7 +25,8 @@ class ReminderListFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DataBindingUtil.inflate(inflater,
+        binding = DataBindingUtil.inflate(
+            inflater,
             R.layout.fragment_reminders, container, false
         )
         binding.viewModel = _viewModel
@@ -43,6 +45,9 @@ class ReminderListFragment : BaseFragment() {
         binding.addReminderFAB.setOnClickListener {
             navigateToAddReminder()
         }
+        binding.refreshLayout.setOnRefreshListener {
+            _viewModel.loadReminders()
+        }
     }
 
     override fun onResume() {
@@ -59,7 +64,14 @@ class ReminderListFragment : BaseFragment() {
     }
 
     private fun setupRecyclerView() {
-        val adapter = RemindersListAdapter {}
+        val adapter = RemindersListAdapter {
+            startActivity(
+                ReminderDescriptionActivity.newIntent(
+                    requireContext(),
+                    reminderDataItem = it
+                )
+            )
+        }
         // Setup the recycler view using the extension function
         binding.reminderssRecyclerView.setup(adapter)
     }

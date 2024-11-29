@@ -3,7 +3,6 @@ package com.udacity.project4.locationreminders.savereminder
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseViewModel
@@ -11,6 +10,7 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.SingleLiveEvent
 import kotlinx.coroutines.launch
 
 class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSource) :
@@ -21,6 +21,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val selectedPOI = MutableLiveData<PointOfInterest?>()
     val latitude = MutableLiveData<Double?>()
     val longitude = MutableLiveData<Double?>()
+    val addGeofenceLiveData: SingleLiveEvent<ReminderDataItem?> = SingleLiveEvent()
 
     /**
      * Clear the live data objects to start fresh next time the view model gets called
@@ -32,6 +33,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         selectedPOI.value = null
         latitude.value = null
         longitude.value = null
+        addGeofenceLiveData.value = null
     }
 
     private fun getReminderDataItem(): ReminderDataItem {
@@ -55,8 +57,13 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     fun validateAndSaveReminder() {
         val reminderData = getReminderDataItem()
         if (validateEnteredData(reminderData)) {
+            addGeofence(reminderData)
             saveReminder(reminderData)
         }
+    }
+
+    private fun addGeofence(reminderData: ReminderDataItem) {
+        addGeofenceLiveData.value = reminderData
     }
 
     /**

@@ -43,4 +43,9 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_in_with_email">Sign in with email</string>
+
+    <!--    Geofence Status Strings-->
+    <string name="geofences_added">Clue Geofence added.</string>
+    <string name="geofences_removed">Geofences removed.</string>
+
 </resources>

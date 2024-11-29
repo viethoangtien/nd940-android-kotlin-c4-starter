@@ -4,6 +4,7 @@ import android.view.View
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.udacity.project4.base.BaseRecyclerViewAdapter
 
 object BindingAdapters {
@@ -20,6 +21,14 @@ object BindingAdapters {
                 clear()
                 addData(itemList)
             }
+        }
+    }
+
+    @BindingAdapter("android:isRefreshing")
+    @JvmStatic
+    fun <T> setRefreshing(swipeRefreshLayout: SwipeRefreshLayout, items: LiveData<List<T>>?) {
+        if (swipeRefreshLayout.isRefreshing) {
+            swipeRefreshLayout.isRefreshing = false;
         }
     }
 
