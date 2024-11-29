@@ -26,43 +26,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         Timber.d("GeofenceBroadcastReceiver action: ${intent.action}")
         if (intent.action == ACTION_GEOFENCE_EVENT) {
             GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
-
-            val geofencingEvent = GeofencingEvent.fromIntent(intent)
-            geofencingEvent?.let {
-                if (geofencingEvent.hasError()) {
-                    val errorMessage = errorMessage(context, geofencingEvent.errorCode)
-                    Log.e(TAG, errorMessage)
-                    return
-                }
-
-                if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    Log.v(TAG, context.getString(R.string.geofence_entered))
-                    val fenceId = when {
-                        geofencingEvent.triggeringGeofences!!.isNotEmpty() ->
-                            geofencingEvent.triggeringGeofences!![0].requestId
-
-                        else -> {
-                            Log.e(TAG, "No Geofence Trigger Found! Abort mission!")
-                            return
-                        }
-                    }
-                    val foundIndex = GeofencingConstants.LANDMARK_DATA.indexOfFirst {
-                        it.id == fenceId
-                    }
-                    if (-1 == foundIndex) {
-                        Log.e(TAG, "Unknown Geofence: Abort Mission")
-                        return
-                    }
-                    val notificationManager = ContextCompat.getSystemService(
-                        context,
-                        NotificationManager::class.java
-                    ) as NotificationManager
-
-                    notificationManager.sendGeofenceEnteredNotification(
-                        context, foundIndex
-                    )
-                }
-            }
         }
     }
 
