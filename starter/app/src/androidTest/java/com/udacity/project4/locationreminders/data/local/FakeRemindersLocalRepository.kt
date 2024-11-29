@@ -1,11 +1,10 @@
-package com.udacity.project4.locationreminders.data
+package com.udacity.project4.locationreminders.data.local
 
+import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 
-//Use FakeDataSource that acts as a test double to the LocalDataSource
-class FakeDataSource : ReminderDataSource {
-
+class FakeRemindersLocalRepository : ReminderDataSource {
     private var remindersServiceData: LinkedHashMap<String, ReminderDTO> = LinkedHashMap()
 
     private var shouldReturnError = false
@@ -38,4 +37,5 @@ class FakeDataSource : ReminderDataSource {
     override suspend fun deleteAllReminders() {
         remindersServiceData.clear()
     }
+
 }

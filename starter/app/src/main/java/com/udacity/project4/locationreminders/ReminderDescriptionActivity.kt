@@ -18,7 +18,7 @@ class ReminderDescriptionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityReminderDescriptionBinding
 
     companion object {
-        private const val EXTRA_ITEM = "EXTRA_ITEM"
+        private const val EXTRA_ITEM = "item"
 
         // Receive the reminder object after the user clicks on the notification
         fun newIntent(context: Context, reminderDataItem: ReminderDataItem): Intent {

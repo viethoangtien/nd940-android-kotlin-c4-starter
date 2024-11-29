@@ -26,9 +26,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+
     testOptions.unitTests {
         includeAndroidResources = true
         returnDefaultValues = true
@@ -37,6 +35,11 @@ android {
     buildFeatures {
         dataBinding true
         buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 

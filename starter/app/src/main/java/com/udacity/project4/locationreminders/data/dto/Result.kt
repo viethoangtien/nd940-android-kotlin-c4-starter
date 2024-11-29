@@ -9,3 +9,9 @@ sealed class Result<out T : Any> {
     data class Error(val message: String?, val statusCode: Int? = null) :
         Result<Nothing>()
 }
+
+val Result<*>.isSuccess
+    get() = this is Result.Success
+
+val Result<*>.isError
+    get() = this is Result.Error

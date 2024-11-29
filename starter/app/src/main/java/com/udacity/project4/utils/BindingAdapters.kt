@@ -28,7 +28,7 @@ object BindingAdapters {
     @JvmStatic
     fun <T> setRefreshing(swipeRefreshLayout: SwipeRefreshLayout, items: LiveData<List<T>>?) {
         if (swipeRefreshLayout.isRefreshing) {
-            swipeRefreshLayout.isRefreshing = false;
+            swipeRefreshLayout.isRefreshing = false
         }
     }
 
