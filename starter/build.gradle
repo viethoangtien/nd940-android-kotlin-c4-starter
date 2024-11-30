@@ -29,7 +29,7 @@ buildscript {
         androidXTestExtKotlinRunnerVersion = '1.1.5'
         archTestingVersion = '2.2.0'
         androidXTestRulesVersion = '1.5.0'
-        espressoVersion = '3.5.1'
+        espressoVersion = '3.6.1'
         swipeRefreshVersion = '1.1.0'
         fragmentTestingVersion = '1.7.1'
         playServicesLocationVersion = '21.3.0'

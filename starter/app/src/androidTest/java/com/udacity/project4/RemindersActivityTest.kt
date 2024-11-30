@@ -1,9 +1,18 @@
 package com.udacity.project4
 
 import android.app.Application
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.idling.CountingIdlingResource
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
+import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -16,7 +25,10 @@ import com.udacity.project4.locationreminders.reminderslist.RemindersListViewMod
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
+import com.udacity.project4.utils.EspressoIdlingResource
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.core.IsNot.not
 import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -27,25 +39,17 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.test.Test
-import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.replaceText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+
 
 @RunWith(AndroidJUnit4::class)
+@ExperimentalCoroutinesApi
 @LargeTest
 //END TO END test to black box test the app
-class RemindersActivityTest :
-    KoinTest {// Extended Koin Test - embed autoclose @after method to close Koin after every test
+class RemindersActivityTest : KoinTest {
+    // Extended Koin Test - embed autoclose @after method to close Koin after every test
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
     private val dataBindingIdlingResource = DataBindingIdlingResource()
-    private val countingIdlingResource = CountingIdlingResource("GLOBAL")
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
@@ -58,17 +62,15 @@ class RemindersActivityTest :
         val myModule = module {
             viewModel {
                 RemindersListViewModel(
-                    appContext,
-                    get() as ReminderDataSource
+                    appContext, get() as ReminderDataSource
                 )
             }
             single {
                 SaveReminderViewModel(
-                    appContext,
-                    get() as ReminderDataSource
+                    appContext, get() as ReminderDataSource
                 )
             }
-            single <ReminderDataSource>{ RemindersLocalRepository(get()) }
+            single<ReminderDataSource> { RemindersLocalRepository(get()) }
             single { LocalDB.createRemindersDao(appContext) }
         }
         //declare a new koin module
@@ -82,14 +84,14 @@ class RemindersActivityTest :
         runBlocking {
             repository.deleteAllReminders()
         }
-        IdlingRegistry.getInstance().register(countingIdlingResource)
+        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().register(dataBindingIdlingResource)
 
     }
 
     @After
     fun tearDown() {
-        IdlingRegistry.getInstance().unregister(countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
         IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
     }
 
@@ -121,6 +123,13 @@ class RemindersActivityTest :
 
             onView(withText("NEW TITLE")).check(matches(isDisplayed()))
             onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(2)))
+            onView(withText(R.string.reminder_saved)).inRoot(
+                withDecorView(
+                    not(
+                        activity.window.decorView
+                    )
+                )
+            ).check(matches(isDisplayed()))
 
         }
         activityScenario.close()
