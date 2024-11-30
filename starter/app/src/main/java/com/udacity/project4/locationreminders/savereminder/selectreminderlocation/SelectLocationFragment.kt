@@ -1,11 +1,16 @@
 package com.udacity.project4.locationreminders.savereminder.selectreminderlocation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
@@ -17,6 +22,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PointOfInterest
+import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
@@ -31,10 +37,27 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var map: GoogleMap
-    private val runningQOrLater =
-        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
     private var selectedPOI: PointOfInterest? = null // To hold the currently selected POI
     private lateinit var geofencingClient: GeofencingClient
+
+    @SuppressLint("MissingPermission")
+    val locationPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(
+                Manifest.permission.ACCESS_FINE_LOCATION, false
+            ) && permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                // Precise location access granted and approximate location access granted.
+                map.isMyLocationEnabled = true
+            }
+
+            else -> {
+                // No location access granted.
+                showSnackBarForExplanation()
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -59,30 +82,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         map = googleMap
         setMapStyle(map)
         setPoiClick(map)
-        checkPermissionToEnableMap()
-    }
-
-    private fun checkPermissionToEnableMap() {
-        val foregroundCoarseLocationApproved = (
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ))
-        val foregroundFineLocationApproved = (
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ))
-        Timber.d(
-            "checkPermissionToEnableMap " +
-                    "foregroundCoarseLocationApproved: $foregroundCoarseLocationApproved, " +
-                    "foregroundFineLocationApproved: $foregroundFineLocationApproved"
+        locationPermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION
+            )
         )
-        if (foregroundCoarseLocationApproved && foregroundFineLocationApproved) {
-            map.isMyLocationEnabled = true
-        }
     }
 
     private fun onLocationSelected() {
@@ -98,8 +102,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             // in a raw resource file.
             val success = googleMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                    requireContext(),
-                    R.raw.map_style
+                    requireContext(), R.raw.map_style
                 )
             )
             if (!success) {
@@ -114,9 +117,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         map.setOnPoiClickListener { poi ->
             clearAllMarkers()
             val poiMarker = map.addMarker(
-                MarkerOptions()
-                    .position(poi.latLng)
-                    .title(poi.name)
+                MarkerOptions().position(poi.latLng).title(poi.name)
             )
             poiMarker?.showInfoWindow()
             selectedPOI = poi
@@ -156,36 +157,17 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         else -> super.onOptionsItemSelected(item)
     }
 
-    @TargetApi(29)
-    private fun foregroundAndBackgroundLocationPermissionApproved(): Boolean {
-        val foregroundCoarseLocationApproved = (
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ))
-        val foregroundFineLocationApproved = (
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ))
-        val backgroundPermissionApproved =
-            if (runningQOrLater) {
-                PackageManager.PERMISSION_GRANTED ==
-                        ActivityCompat.checkSelfPermission(
-                            requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        )
-            } else {
-                true
-            }
-        Timber.d(
-            "foregroundAndBackgroundLocationPermissionApproved " +
-                    "foregroundCoarseLocationApproved: $foregroundCoarseLocationApproved, " +
-                    "foregroundFineLocationApproved: $foregroundFineLocationApproved, " +
-                    "backgroundPermissionApproved: $backgroundPermissionApproved"
-        )
-        return foregroundCoarseLocationApproved && foregroundFineLocationApproved && backgroundPermissionApproved
+    private fun showSnackBarForExplanation() {
+        Timber.d("showSnackBarForExplanation")
+        Snackbar.make(
+            binding.root, R.string.permission_denied_explanation, Snackbar.LENGTH_INDEFINITE
+        ).setAction(R.string.settings) {
+            startActivity(Intent().apply {
+                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                data = Uri.fromParts("package", requireActivity().application.packageName, null)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }.show()
     }
 
 }
