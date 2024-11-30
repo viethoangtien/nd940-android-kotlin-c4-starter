@@ -33,6 +33,8 @@ import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.geofence.GeofencingConstants
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
@@ -78,6 +80,7 @@ class SaveReminderFragment : BaseFragment() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ ->
         // Check background service location request is approved in onStart() function
+        checkPermissionsBeforeAddGeofence()
     }
 
 
@@ -246,7 +249,9 @@ class SaveReminderFragment : BaseFragment() {
 
         locationSettingsResponseTask.addOnCompleteListener {
             Timber.d("addOnCompleteListener isSuccessful: ${it.isSuccessful}")
-            _viewModel.validateAndSaveReminder()
+            if (it.isSuccessful) {
+                _viewModel.validateAndSaveReminder()
+            }
         }
     }
 
@@ -255,6 +260,16 @@ class SaveReminderFragment : BaseFragment() {
             checkDeviceLocationSettings()
         } else {
             requestForegroundPermissions()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+            runBlocking {
+                delay(1000)
+                checkDeviceLocationSettings(false)
+            }
         }
     }
 

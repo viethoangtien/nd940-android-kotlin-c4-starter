@@ -13,6 +13,7 @@ import com.udacity.project4.authentication.AuthenticationState
 import com.udacity.project4.databinding.ActivityRemindersBinding
 import timber.log.Timber
 
+
 /**
  * The RemindersActivity that holds the reminders fragments
  */
@@ -32,7 +33,8 @@ class RemindersActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+                val navHostFragment =
+                    supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
                 navHostFragment.navController.popBackStack()
                 return true
             }
@@ -62,6 +64,16 @@ class RemindersActivity : AppCompatActivity() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Timber.d("turn on device location request code: $requestCode")
+        supportFragmentManager.primaryNavigationFragment?.getChildFragmentManager()?.fragments?.let {
+            for (fragment in it) {
+                fragment.onActivityResult(requestCode, resultCode, data)
+            }
+        }
     }
 
     override fun onDestroy() {

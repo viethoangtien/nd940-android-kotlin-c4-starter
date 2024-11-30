@@ -59,6 +59,14 @@
           }
         },
         {
+          "client_id": "851288310258-e8qqor65i11g6adosmvb302qg0hho6lb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.udacity.project4",
+            "certificate_hash": "d8e84f5987ccdbdc0d57ea0ea12915fb64eff607"
+          }
+        },
+        {
           "client_id": "851288310258-qicud1kbgd2nculoe5t1o6ahst6qv7h4.apps.googleusercontent.com",
           "client_type": 3
         }
