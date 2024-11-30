@@ -35,8 +35,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         private const val REQUEST_CODE = 0
 
         fun getBroadcast(context: Context): PendingIntent {
-            val runningSOrLater =
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
             return Intent(context, GeofenceBroadcastReceiver::class.java).let {
                 it.action = ACTION_GEOFENCE_EVENT
                 PendingIntent.getBroadcast(
