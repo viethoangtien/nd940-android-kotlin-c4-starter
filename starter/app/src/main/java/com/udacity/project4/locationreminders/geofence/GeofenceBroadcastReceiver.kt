@@ -43,7 +43,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                     context,
                     REQUEST_CODE,
                     it,
-                    if (runningSOrLater) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                 )
             }
         }
