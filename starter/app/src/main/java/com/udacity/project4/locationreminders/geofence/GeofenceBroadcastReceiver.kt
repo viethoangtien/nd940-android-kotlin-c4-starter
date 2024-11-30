@@ -22,6 +22,7 @@ import timber.log.Timber
  *
  */
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
         Timber.d("GeofenceBroadcastReceiver action: ${intent.action}")
         if (intent.action == ACTION_GEOFENCE_EVENT) {
@@ -34,13 +35,15 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         private const val REQUEST_CODE = 0
 
         fun getBroadcast(context: Context): PendingIntent {
+            val runningSOrLater =
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
             return Intent(context, GeofenceBroadcastReceiver::class.java).let {
                 it.action = ACTION_GEOFENCE_EVENT
                 PendingIntent.getBroadcast(
                     context,
                     REQUEST_CODE,
                     it,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    if (runningSOrLater) PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
                 )
             }
         }

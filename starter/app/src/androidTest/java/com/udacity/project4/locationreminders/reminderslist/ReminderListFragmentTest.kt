@@ -2,7 +2,6 @@ package com.udacity.project4.locationreminders.reminderslist
 
 import android.app.Application
 import android.os.Bundle
-import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -12,25 +11,24 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
-import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.R
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
-import com.udacity.project4.locationreminders.data.dto.isError
 import com.udacity.project4.locationreminders.data.dto.toReminderDTO
 import com.udacity.project4.locationreminders.data.local.FakeRemindersLocalRepository
-import com.udacity.project4.locationreminders.data.local.LocalDB
-import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.not
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.junit.After
@@ -45,7 +43,6 @@ import org.koin.test.KoinTest
 import org.koin.test.get
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -176,7 +173,8 @@ class ReminderListFragmentTest : KoinTest {
         launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
 
         // THEN - Show snack bar with error.
-        onView(withText("Test exception")).check(matches(isDisplayed()))
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText("Test exception")))
     }
 
 
