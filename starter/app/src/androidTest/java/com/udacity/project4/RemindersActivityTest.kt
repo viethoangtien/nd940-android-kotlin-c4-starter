@@ -1,5 +1,6 @@
 package com.udacity.project4
 
+import android.app.Activity
 import android.app.Application
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -108,32 +109,34 @@ class RemindersActivityTest : KoinTest {
 
         // Start up Tasks screen.
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
-        // Interact with the activity
-        activityScenario.onActivity { activity ->
-            // Perform actions on the activity
-            dataBindingIdlingResource.monitorActivity(activityScenario)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
 
-            onView(withId(R.id.reminderssRecyclerView)).check(matches(isDisplayed()))
-            onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(1)))
+        onView(withId(R.id.reminderssRecyclerView)).check(matches(isDisplayed()))
+        onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(1)))
 
-            onView(withId(R.id.addReminderFAB)).perform(click())
-            onView(withId(R.id.reminderTitle)).perform(replaceText("NEW TITLE"))
-            onView(withId(R.id.reminderDescription)).perform(replaceText("NEW DESCRIPTION"))
-            onView(withId(R.id.saveReminder)).perform(click())
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderTitle)).perform(replaceText("NEW TITLE"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("NEW DESCRIPTION"))
+        onView(withId(R.id.saveReminder)).perform(click())
 
-            onView(withText("NEW TITLE")).check(matches(isDisplayed()))
-            onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(2)))
-            onView(withText(R.string.reminder_saved)).inRoot(
-                withDecorView(
-                    not(
-                        activity.window.decorView
-                    )
+        onView(withText("NEW TITLE")).check(matches(isDisplayed()))
+        onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(2)))
+        onView(withText(R.string.reminder_saved)).inRoot(
+            withDecorView(
+                not(
+                    getActivity(activityScenario).window.decorView
                 )
-            ).check(matches(isDisplayed()))
+            )
+        ).check(matches(isDisplayed()))
 
-        }
         activityScenario.close()
     }
 
-
+    private fun getActivity(activityScenario: ActivityScenario<RemindersActivity>): Activity {
+        lateinit var activity: Activity
+        activityScenario.onActivity {
+            activity = it
+        }
+        return activity
+    }
 }
