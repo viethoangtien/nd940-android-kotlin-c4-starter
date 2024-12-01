@@ -120,8 +120,10 @@ class SaveReminderFragment : BaseFragment() {
         }
 
         binding.saveReminder.setOnClickListener {
-            // Check permission at first
-            checkPermissionsBeforeAddGeofence()
+            if (_viewModel.validateEnteredData()) {
+                // Check permission at first
+                checkPermissionsBeforeAddGeofence()
+            }
         }
     }
 

@@ -27,7 +27,6 @@ class RemindersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRemindersBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        observeAuthenticationState()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -40,30 +39,6 @@ class RemindersActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun observeAuthenticationState() {
-        viewModel.authenticationState.observe(this) { authenticationState ->
-            when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
-                    // Signed In
-                    Timber.d("observeAuthenticationState AUTHENTICATED")
-                }
-
-                else -> {
-                    // Signed Out
-                    Timber.d("observeAuthenticationState UNAUTHENTICATED")
-                    goToAuthenticationScreen()
-                }
-            }
-        }
-    }
-
-    private fun goToAuthenticationScreen() {
-        val intent = Intent(this, AuthenticationActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

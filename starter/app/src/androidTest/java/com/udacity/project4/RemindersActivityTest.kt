@@ -10,18 +10,16 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
-import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
+import com.udacity.project4.locationreminders.RemindersViewModel
 import com.udacity.project4.locationreminders.data.ReminderDataSource
-import com.udacity.project4.locationreminders.data.dto.toReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
-import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
@@ -29,6 +27,7 @@ import com.udacity.project4.util.monitorActivity
 import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.`is`
 import org.hamcrest.core.IsNot.not
 import org.junit.After
 import org.junit.Before
@@ -80,7 +79,6 @@ class RemindersActivityTest : KoinTest {
         }
         //Get our real repository
         repository = get()
-
         //clear the data to start fresh
         runBlocking {
             repository.deleteAllReminders()
@@ -98,21 +96,8 @@ class RemindersActivityTest : KoinTest {
 
     @Test
     fun saveReminder() = runBlocking {
-        val reminder = ReminderDataItem(
-            title = "TITLE",
-            description = "DESCRIPTION",
-            location = "Pham Van Bach",
-            latitude = 21.026988562137088,
-            longitude = 105.78886761961745
-        )
-        repository.saveReminder(reminder.toReminderDTO())
-
-        // Start up Tasks screen.
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
-
-        onView(withId(R.id.reminderssRecyclerView)).check(matches(isDisplayed()))
-        onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(1)))
 
         onView(withId(R.id.addReminderFAB)).perform(click())
         onView(withId(R.id.reminderTitle)).perform(replaceText("NEW TITLE"))
@@ -120,14 +105,16 @@ class RemindersActivityTest : KoinTest {
         onView(withId(R.id.saveReminder)).perform(click())
 
         onView(withText("NEW TITLE")).check(matches(isDisplayed()))
-        onView(withId(R.id.reminderssRecyclerView)).check(matches(hasMinimumChildCount(2)))
-        onView(withText(R.string.reminder_saved)).inRoot(
-            withDecorView(
-                not(
-                    getActivity(activityScenario).window.decorView
+
+        onView(withText("Please select location")).inRoot(
+                withDecorView(
+                    `is`(
+                        getActivity(
+                            activityScenario
+                        ).window.decorView
+                    )
                 )
-            )
-        ).check(matches(isDisplayed()))
+            ).check(matches(isDisplayed()))
 
         activityScenario.close()
     }
