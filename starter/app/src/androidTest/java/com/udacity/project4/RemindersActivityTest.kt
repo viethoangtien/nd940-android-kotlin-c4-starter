@@ -2,6 +2,7 @@ package com.udacity.project4
 
 import android.app.Activity
 import android.app.Application
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
@@ -15,8 +16,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.locationreminders.RemindersActivity
-import com.udacity.project4.locationreminders.RemindersViewModel
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -27,10 +30,11 @@ import com.udacity.project4.util.monitorActivity
 import com.udacity.project4.utils.EspressoIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers.`is`
+import org.hamcrest.core.Is.`is`
 import org.hamcrest.core.IsNot.not
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -50,6 +54,10 @@ class RemindersActivityTest : KoinTest {
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
     private val dataBindingIdlingResource = DataBindingIdlingResource()
+    private lateinit var saveReminderViewModel: SaveReminderViewModel
+
+    @get:Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
@@ -79,6 +87,7 @@ class RemindersActivityTest : KoinTest {
         }
         //Get our real repository
         repository = get()
+        saveReminderViewModel = get()
         //clear the data to start fresh
         runBlocking {
             repository.deleteAllReminders()
@@ -95,7 +104,7 @@ class RemindersActivityTest : KoinTest {
     }
 
     @Test
-    fun saveReminder() = runBlocking {
+    fun saveReminder_errorLocation() = runBlocking {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
 
@@ -107,14 +116,46 @@ class RemindersActivityTest : KoinTest {
         onView(withText("NEW TITLE")).check(matches(isDisplayed()))
 
         onView(withText("Please select location")).inRoot(
-                withDecorView(
+            withDecorView(
+                `is`(
+                    getActivity(
+                        activityScenario
+                    ).window.decorView
+                )
+            )
+        ).check(matches(isDisplayed()))
+
+        activityScenario.close()
+    }
+
+    @Test
+    fun saveReminder_geofenceAdded() = runBlocking {
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+        onView(withId(R.id.addReminderFAB)).perform(click())
+
+        onView(withId(R.id.reminderTitle)).perform(replaceText("NEW TITLE"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("NEW DESCRIPTION"))
+        saveReminderViewModel.setSelectedPOI(
+            PointOfInterest(
+                LatLng(0.0, 0.0), System.currentTimeMillis().toString(), "PLACE"
+            )
+        )
+        onView(withId(R.id.saveReminder)).perform(click())
+
+        // TODO: I can not test toast message on Android 12. Refer link: https://github.com/android/android-test/issues/803
+        onView(withText(R.string.reminder_saved)).inRoot(
+            withDecorView(
+                not(
                     `is`(
                         getActivity(
                             activityScenario
                         ).window.decorView
                     )
                 )
-            ).check(matches(isDisplayed()))
+            )
+        ).check(matches(isDisplayed()))
 
         activityScenario.close()
     }
@@ -127,3 +168,4 @@ class RemindersActivityTest : KoinTest {
         return activity
     }
 }
+

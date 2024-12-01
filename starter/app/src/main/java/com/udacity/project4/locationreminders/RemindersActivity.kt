@@ -1,10 +1,15 @@
 package com.udacity.project4.locationreminders
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
@@ -21,12 +26,14 @@ class RemindersActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRemindersBinding
 
-    private val viewModel by viewModels<RemindersViewModel>()
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRemindersBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        requestNotificationPermission()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -47,6 +54,24 @@ class RemindersActivity : AppCompatActivity() {
         supportFragmentManager.primaryNavigationFragment?.getChildFragmentManager()?.fragments?.let {
             for (fragment in it) {
                 fragment.onActivityResult(requestCode, resultCode, data)
+            }
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // You can use the API that requires the permission.
+                }
+                else -> {
+                    // You can directly ask for the permission.
+                    // The registered ActivityResultCallback gets the result of this request.
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
         }
     }
