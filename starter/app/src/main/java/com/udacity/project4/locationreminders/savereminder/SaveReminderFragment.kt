@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.Geofence
@@ -49,8 +51,7 @@ class SaveReminderFragment : BaseFragment() {
         GeofenceBroadcastReceiver.getBroadcast(requireContext())
     }
 
-    private val runningQOrLater =
-        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+    private val runningQOrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     private val foregroundLocationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -62,7 +63,7 @@ class SaveReminderFragment : BaseFragment() {
         val foregroundFineLocationApproved =
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)
         Timber.d(
-            "foregroundLocationPermissionRequest callback " + "foregroundCoarseLocationApproved: $foregroundCoarseLocationApproved, " + "foregroundFineLocationApproved: $foregroundFineLocationApproved"
+            "foregroundLocationPermissionRequest callback foregroundCoarseLocationApproved: $foregroundCoarseLocationApproved, foregroundFineLocationApproved: $foregroundFineLocationApproved"
         )
         when {
             foregroundCoarseLocationApproved && foregroundFineLocationApproved -> {
@@ -83,6 +84,11 @@ class SaveReminderFragment : BaseFragment() {
         checkPermissionsBeforeAddGeofence()
     }
 
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            // don't force user enable notification permission.
+            _viewModel.validateAndSaveReminder()
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -250,7 +256,7 @@ class SaveReminderFragment : BaseFragment() {
         locationSettingsResponseTask.addOnCompleteListener {
             Timber.d("addOnCompleteListener isSuccessful: ${it.isSuccessful}")
             if (it.isSuccessful) {
-                _viewModel.validateAndSaveReminder()
+                requestNotificationPermission()
             }
         }
     }
@@ -270,6 +276,27 @@ class SaveReminderFragment : BaseFragment() {
                 delay(1000)
                 checkDeviceLocationSettings(false)
             }
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    requireContext(), Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // You can use the API that requires the permission.
+                    _viewModel.validateAndSaveReminder()
+                }
+
+                else -> {
+                    // You can directly ask for the permission.
+                    // The registered ActivityResultCallback gets the result of this request.
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            _viewModel.validateAndSaveReminder()
         }
     }
 
